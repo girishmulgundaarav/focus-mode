@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Focus Screen</title>
+  <meta name="description" content="A minimalist, ambient Focus Screen to help you find your flow.">
+  
+  <!-- Tailwind CSS v4 via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  
+  <!-- Lucide Icons via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+  
+  <!-- Premium Typography: Plus Jakarta Sans & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* Base typography and custom smooth scrolling */
+    html {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #020617; /* Deep slate-950 base */
+    }
+
+    /* Subtle grid background pattern to add depth */
+    .bg-grid {
+      background-size: 50px 50px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+      -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+    }
+
+    /* Ambient pulse keyframes */
+    @keyframes slow-breath {
+      0%, 100% {
+        opacity: 0.15;
+        transform: scale(0.95) translate(0px, 0px);
+      }
+      33% {
+        opacity: 0.35;
+        transform: scale(1.08) translate(8px, -12px);
+      }
+      66% {
+        opacity: 0.22;
+        transform: scale(1.02) translate(-8px, 8px);
+      }
+    }
+
+    @keyframes slow-breath-reverse {
+      0%, 100% {
+        opacity: 0.12;
+        transform: scale(1.02) translate(0px, 0px);
+      }
+      50% {
+        opacity: 0.28;
+        transform: scale(0.92) translate(-10px, 12px);
+      }
+    }
+
+    .animate-breath-1 {
+      animation: slow-breath 14s ease-in-out infinite;
+    }
+
+    .animate-breath-2 {
+      animation: slow-breath-reverse 18s ease-in-out infinite;
+    }
+
+    /* Premium Glassmorphism Button styles */
+    .glass-button {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: 
+        0 8px 32px 0 rgba(0, 0, 0, 0.37),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
+        inset 0 -1px 0 0 rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .glass-button:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.12);
+      box-shadow: 
+        0 12px 40px 0 rgba(0, 0, 0, 0.5),
+        0 0 30px 2px rgba(99, 102, 241, 0.08),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+      transform: scale(1.04);
+    }
+
+    .glass-button:active {
+      transform: scale(0.96);
+      transition-duration: 0.1s;
+    }
+
+    /* Active focus state styles for the button */
+    .glass-button.active-state {
+      background: rgba(16, 185, 129, 0.03); /* Extremely subtle emerald hue */
+      border-color: rgba(16, 185, 129, 0.2);
+      box-shadow: 
+        0 8px 32px 0 rgba(16, 185, 129, 0.1),
+        0 0 40px 4px rgba(16, 185, 129, 0.08),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .glass-button.active-state:hover {
+      background: rgba(16, 185, 129, 0.06);
+      border-color: rgba(16, 185, 129, 0.35);
+      box-shadow: 
+        0 12px 40px 0 rgba(16, 185, 129, 0.15),
+        0 0 50px 8px rgba(16, 185, 129, 0.12),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+    }
+
+    /* Keyframes for spinning focus elements */
+    @keyframes slow-spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .animate-slow-spin {
+      animation: slow-spin 25s linear infinite;
+    }
+
+    /* Clean custom styles for volume input range */
+    #volume-slider::-webkit-slider-runnable-track {
+      background: rgba(255, 255, 255, 0.08);
+      height: 3px;
+      border-radius: 1.5px;
+    }
+    #volume-slider::-webkit-slider-thumb {
+      background: #ffffff;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-top: -2.5px;
+      appearance: none;
+      transition: transform 0.2s ease;
+    }
+    #volume-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.4);
+    }
+    #volume-slider::-moz-range-track {
+      background: rgba(255, 255, 255, 0.08);
+      height: 3px;
+      border-radius: 1.5px;
+    }
+    #volume-slider::-moz-range-thumb {
+      background: #ffffff;
+      width: 8px;
+      height: 8px;
+      border: none;
+      border-radius: 50%;
+      transition: transform 0.2s ease;
+    }
+    #volume-slider::-moz-range-thumb:hover {
+      transform: scale(1.4);
+    }
+
+    /* Touch optimization for range input slider thumbs */
+    @media (pointer: coarse) {
+      #volume-slider::-webkit-slider-runnable-track {
+        height: 4px;
+      }
+      #volume-slider::-webkit-slider-thumb {
+        width: 16px;
+        height: 16px;
+        margin-top: -6px; /* Center: (4px track - 16px thumb) / 2 = -6px */
+      }
+      #volume-slider::-moz-range-track {
+        height: 4px;
+      }
+      #volume-slider::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased overflow-hidden min-h-screen flex flex-col justify-between items-center p-4 sm:p-6 md:p-8 relative selection:bg-indigo-500/20">
+
+  <!-- Background Layer: Grid & Vignette -->
+  <div class="absolute inset-0 bg-grid pointer-events-none z-0"></div>
+  <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,#020617_95%)] pointer-events-none z-0"></div>
+
+  <!-- Background Layer: Soothing Glowing Ambient Orbs -->
+  <div class="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden z-0">
+    <!-- Orb 1 (Indigo/Violet) -->
+    <div id="glow-orb-1" class="absolute w-[450px] h-[450px] rounded-full bg-indigo-500/0 blur-[120px] transition-all duration-[2000ms] ease-in-out"></div>
+    <!-- Orb 2 (Emerald/Cyan) -->
+    <div id="glow-orb-2" class="absolute w-[400px] h-[400px] rounded-full bg-emerald-500/0 blur-[110px] transition-all duration-[2000ms] ease-in-out translate-x-12 -translate-y-8"></div>
+  </div>
+
+  <!-- Top Header Navigation -->
+  <header id="app-header" class="w-full max-w-5xl flex justify-between items-center z-10 transition-all duration-1000 ease-in-out opacity-25 hover:opacity-100">
+    <div class="flex items-center gap-2">
+      <!-- Sleek minimalist dot brand icon -->
+      <span class="w-2 h-2 rounded-full bg-indigo-500" id="brand-dot"></span>
+      <span class="text-xs font-semibold tracking-[0.25em] uppercase text-slate-300 font-mono">FLOWSTATE</span>
+    </div>
+    <div class="text-[10px] tracking-widest text-slate-500 font-mono">v1.0.0</div>
+  </header>
+
+  <!-- Centered Focus Button & Status Section -->
+  <main class="flex flex-col items-center justify-center flex-grow z-10 relative">
+    
+    <!-- Minimalist Pomodoro Timer Digits -->
+    <div id="timer-container" class="mb-4 transition-all duration-1000 ease-in-out opacity-15 hover:opacity-40 select-none cursor-default">
+      <span id="timer-display-large" class="text-6xl md:text-7xl font-extralight tracking-widest font-mono text-slate-100/90">25:00</span>
+    </div>
+
+    <div class="relative flex items-center justify-center">
+      <!-- Subtle pulsating outer background ring -->
+      <div id="outer-pulse-ring" class="absolute w-36 h-36 md:w-44 md:h-44 rounded-full border border-indigo-500/0 scale-90 opacity-0 transition-all duration-1000 pointer-events-none z-0"></div>
+      
+      <!-- Central Floating Action Button (FAB) -->
+      <button id="focus-button" aria-label="Toggle Focus State" class="glass-button w-24 h-24 md:w-28 md:h-28 rounded-full flex items-center justify-center cursor-pointer relative z-10 focus:outline-none focus:ring-2 focus:ring-slate-700/50">
+        
+        <!-- Play Icon Wrapper (to avoid stale reference when Lucide replaces i elements with SVG) -->
+        <div id="play-icon-wrapper" class="flex items-center justify-center transition-all duration-500 ease-out">
+          <i data-lucide="play" class="w-8 h-8 md:w-10 md:h-10 text-slate-200 fill-slate-200 translate-x-0.5"></i>
+        </div>
+        
+        <!-- Lucide Active Focus Icon (Visible when Focus Active) -->
+        <div id="active-icon-wrapper" class="absolute inset-0 flex items-center justify-center opacity-0 scale-75 rotate-45 transition-all duration-500 ease-out pointer-events-none">
+          <i id="active-icon" data-lucide="target" class="w-8 h-8 md:w-10 md:h-10 text-emerald-400 animate-slow-spin"></i>
+        </div>
+      </button>
+    </div>
+
+    <!-- Status Text & Sub-labels -->
+    <div id="status-container" class="h-16 mt-8 flex flex-col items-center justify-center transition-all duration-1000 ease-in-out">
+      <span id="status-label" class="text-xs md:text-sm font-semibold tracking-[0.25em] uppercase text-slate-400/70 transition-colors duration-700">
+        Ready
+      </span>
+      <span id="sub-label" class="text-[10px] tracking-wide text-slate-500/50 mt-1.5 transition-colors duration-700">
+        Click to enter flow
+      </span>
+    </div>
+
+  </main>
+
+  <!-- Volume Control Slider (Fades in near bottom of screen on hover) -->
+  <div id="volume-container" class="absolute bottom-20 left-1/2 -translate-x-1/2 flex items-center gap-2.5 bg-slate-900/60 border border-white/5 backdrop-blur-md px-3.5 py-1.5 rounded-full opacity-0 translate-y-2 pointer-events-none transition-all duration-500 ease-out z-20 shadow-2xl">
+    <i id="volume-icon" data-lucide="volume-2" class="w-3.5 h-3.5 text-slate-400 transition-colors duration-300"></i>
+    <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5" class="w-20 md:w-24 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 focus:outline-none" aria-label="Volume">
+  </div>
+
+  <!-- Bottom Settings & Custom Controls Footer -->
+  <footer id="app-footer" class="w-full max-w-5xl flex justify-between items-center z-10 text-[11px] text-slate-600 font-mono transition-all duration-1000 ease-in-out opacity-20 hover:opacity-100">
+    <div class="hover:text-slate-400 transition-colors duration-300 cursor-default flex items-center gap-1.5">
+      <span class="w-1.5 h-1.5 rounded-full bg-slate-700 transition-colors duration-500" id="ambient-status-dot"></span>
+      Ambient Calm
+    </div>
+    
+    <!-- Controls for audio & timer -->
+    <div id="quick-controls" class="flex gap-4 sm:gap-6">
+      
+      <!-- Relative container for positioning Timer Popover -->
+      <div class="relative">
+        <button class="hover:text-slate-400 transition-colors duration-300 cursor-pointer flex items-center gap-1.5 focus:outline-none" id="btn-timer-config">
+          <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+          <span>Timer:</span>
+          <span class="text-indigo-400 font-medium transition-colors duration-300" id="timer-display">25:00</span>
+        </button>
+
+        <!-- Timer Selector Popover Menu -->
+        <div id="timer-popover" class="absolute bottom-full left-0 mb-3 w-40 bg-slate-900/90 backdrop-blur-lg border border-white/10 rounded-xl p-1.5 flex flex-col gap-0.5 z-30 transition-all duration-300 opacity-0 translate-y-2 pointer-events-none shadow-xl">
+          <button class="timer-opt flex items-center justify-between px-3 py-2 text-[11px] rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all focus:outline-none cursor-pointer" data-timer="15">
+            <span>15 Minutes</span>
+            <i data-lucide="check" class="check-icon w-3.5 h-3.5 text-indigo-400 opacity-0 transition-opacity duration-300"></i>
+          </button>
+          <button class="timer-opt flex items-center justify-between px-3 py-2 text-[11px] rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all focus:outline-none cursor-pointer" data-timer="25">
+            <span>25 Minutes</span>
+            <i data-lucide="check" class="check-icon w-3.5 h-3.5 text-indigo-400 opacity-0 transition-opacity duration-300"></i>
+          </button>
+          <button class="timer-opt flex items-center justify-between px-3 py-2 text-[11px] rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all focus:outline-none cursor-pointer" data-timer="50">
+            <span>50 Minutes</span>
+            <i data-lucide="check" class="check-icon w-3.5 h-3.5 text-indigo-400 opacity-0 transition-opacity duration-300"></i>
+          </button>
+          <div class="h-[1px] bg-white/10 my-1 mx-2"></div>
+          <button class="flex items-center justify-between px-3 py-2 text-[11px] rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all focus:outline-none cursor-pointer" id="btn-timer-reset">
+            <span>Reset Timer</span>
+            <i data-lucide="rotate-ccw" class="w-3 h-3 text-slate-400"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Relative container for positioning Sound Popover -->
+      <div class="relative">
+        <button class="hover:text-slate-400 transition-colors duration-300 cursor-pointer flex items-center gap-1.5 focus:outline-none" id="btn-sound-config">
+          <i data-lucide="music" class="w-3.5 h-3.5"></i>
+          <span>Sound:</span>
+          <span class="text-indigo-400 font-medium transition-colors duration-300" id="sound-display">Lofi Beats</span>
+        </button>
+
+        <!-- Sound Selector Popover Menu -->
+        <div id="sound-popover" class="absolute bottom-full right-0 mb-3 w-44 bg-slate-900/90 backdrop-blur-lg border border-white/10 rounded-xl p-1.5 flex flex-col gap-0.5 z-30 transition-all duration-300 opacity-0 translate-y-2 pointer-events-none shadow-xl">
+          <button class="sound-opt flex items-center justify-between px-3 py-2 text-[11px] rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all focus:outline-none cursor-pointer" data-sound="lofi">
+            <span>Lofi Beats</span>
+            <i data-lucide="check" class="check-icon w-3 h-3 text-indigo-400 opacity-0 transition-opacity duration-300"></i>
+          </button>
+          <button class="sound-opt flex items-center justify-between px-3 py-2 text-[11px] rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all focus:outline-none cursor-pointer" data-sound="brown">
+            <span>Brownian Focus</span>
+            <i data-lucide="check" class="check-icon w-3 h-3 text-emerald-400 opacity-0 transition-opacity duration-300"></i>
+          </button>
+          <button class="sound-opt flex items-center justify-between px-3 py-2 text-[11px] rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all focus:outline-none cursor-pointer" data-sound="mute">
+            <span>Silence</span>
+            <i data-lucide="check" class="check-icon w-3 h-3 text-slate-400 opacity-0 transition-opacity duration-300"></i>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- Core Logic Script (Modular ES Module Structure) -->
+  <script type="module">
+    /**
+     * Focus Screen - Core Module
+     * Includes Pomodoro timer countdown and synthesized crystalline chime notifications.
+     */
+
+    // ==========================================
+    // 1. Audio Engines Definitions
+    // ==========================================
+
+    // Plays a soft, crystalline triad bell chime programmatically (zero network dependencies)
+    function playCrystallineChime() {
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        const audioCtx = new AudioContextClass();
+        
+        // 1. Principal base note (A5 - bell fundamental)
+        const osc1 = audioCtx.createOscillator();
+        const gain1 = audioCtx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 (880 Hz)
+        
+        // 2. High Shimmer Overtone (E6 - perfect fifth ratio for sparkle)
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(1318.51, audioCtx.currentTime); // E6 (1318.51 Hz)
+        
+        // 3. Warm ambient overtone (C#6 - major third ratio to build an A Major chord)
+        const osc3 = audioCtx.createOscillator();
+        const gain3 = audioCtx.createGain();
+        osc3.type = 'sine';
+        osc3.frequency.setValueAtTime(1108.73, audioCtx.currentTime); // C#6 (1108.73 Hz)
+
+        const now = audioCtx.currentTime;
+
+        // Custom chime envelopes: rapid attack, slow exponential release
+        gain1.gain.setValueAtTime(0, now);
+        gain1.gain.linearRampToValueAtTime(0.18, now + 0.03); // Soothing base attack
+        gain1.gain.exponentialRampToValueAtTime(0.0001, now + 2.5); // Warm ringout
+
+        gain2.gain.setValueAtTime(0, now);
+        gain2.gain.linearRampToValueAtTime(0.06, now + 0.05); // High sparkle attack
+        gain2.gain.exponentialRampToValueAtTime(0.0001, now + 1.6); // Shorter sparkle release
+
+        gain3.gain.setValueAtTime(0, now);
+        gain3.gain.linearRampToValueAtTime(0.09, now + 0.04); // Middle body attack
+        gain3.gain.exponentialRampToValueAtTime(0.0001, now + 2.0); // Balanced release
+
+        // Wire nodes
+        osc1.connect(gain1);
+        osc2.connect(gain2);
+        osc3.connect(gain3);
+
+        gain1.connect(audioCtx.destination);
+        gain2.connect(audioCtx.destination);
+        gain3.connect(audioCtx.destination);
+
+        // Schedule triggers
+        osc1.start(now);
+        osc2.start(now);
+        osc3.start(now);
+
+        osc1.stop(now + 2.7);
+        osc2.stop(now + 1.8);
+        osc3.stop(now + 2.2);
+      } catch (e) {
+        console.error("Failed to generate synthesized crystalline chime:", e);
+      }
+    }
+
+    // Generates soothing brown noise programmatically using Web Audio API (zero network, bulletproof)
+    class BrownNoiseGenerator {
+      constructor() {
+        this.audioContext = null;
+        this.noiseSource = null;
+        this.gainNode = null;
+        this.volume = 0.5;
+        this.isPlaying = false;
+      }
+
+      init() {
+        if (this.audioContext) return;
+        
+        try {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) {
+            this.audioContext = new AudioContextClass();
+            this.gainNode = this.audioContext.createGain();
+            this.gainNode.gain.setValueAtTime(this.volume, this.audioContext.currentTime);
+            this.gainNode.connect(this.audioContext.destination);
+
+            // Generate 2 seconds of Brown Noise buffer
+            const bufferSize = 2 * this.audioContext.sampleRate;
+            const noiseBuffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            let lastOut = 0.0;
+
+            for (let i = 0; i < bufferSize; i++) {
+              const white = Math.random() * 2 - 1;
+              // First-order filter to approximate brown noise (spectral density 1/f^2)
+              output[i] = (lastOut + (0.02 * white)) / 1.02;
+              lastOut = output[i];
+              output[i] *= 3.5; // Compensate for loss of volume
+            }
+
+            this.buffer = noiseBuffer;
+          }
+        } catch (e) {
+          console.error("Web Audio API not supported or failed to initialize:", e);
+        }
+      }
+
+      play() {
+        this.init();
+        if (!this.audioContext) return;
+        if (this.audioContext.state === 'suspended') {
+          this.audioContext.resume();
+        }
+
+        this.stop(); // Clear any existing playing node
+
+        this.noiseSource = this.audioContext.createBufferSource();
+        this.noiseSource.buffer = this.buffer;
+        this.noiseSource.loop = true;
+        this.noiseSource.connect(this.gainNode);
+        this.noiseSource.start();
+        this.isPlaying = true;
+      }
+
+      stop() {
+        if (this.noiseSource) {
+          try {
+            this.noiseSource.stop();
+          } catch (e) {}
+          this.noiseSource.disconnect();
+          this.noiseSource = null;
+        }
+        this.isPlaying = false;
+      }
+
+      setVolume(val) {
+        this.volume = val;
+        if (this.gainNode && this.audioContext) {
+          this.gainNode.gain.setValueAtTime(val, this.audioContext.currentTime);
+        }
+      }
+    }
+
+    // Handles network-streamed lofi audio loops
+    class AudioStreamer {
+      constructor(url) {
+        this.url = url;
+        this.audio = null;
+        this.volume = 0.5;
+        this.onErrorCallback = null;
+        this.isPlaying = false;
+      }
+
+      init() {
+        if (this.audio) return;
+        this.audio = new Audio(this.url);
+        this.audio.loop = true;
+        this.audio.volume = this.volume;
+        this.audio.crossOrigin = "anonymous";
+
+        // Setup error handler
+        this.audio.addEventListener('error', (e) => {
+          console.error("AudioStreamer error loading stream:", e);
+          this.isPlaying = false;
+          if (this.onErrorCallback) {
+            this.onErrorCallback(e);
+          }
+        });
+      }
+
+      play() {
+        this.init();
+        this.audio.volume = this.volume;
+        
+        const playPromise = this.audio.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            this.isPlaying = true;
+          }).catch(error => {
+            console.warn("AudioStreamer interrupted play request:", error);
+            this.isPlaying = false;
+            if (this.onErrorCallback) {
+              this.onErrorCallback(error);
+            }
+          });
+        }
+      }
+
+      pause() {
+        if (this.audio) {
+          this.audio.pause();
+        }
+        this.isPlaying = false;
+      }
+
+      setVolume(val) {
+        this.volume = val;
+        if (this.audio) {
+          this.audio.volume = val;
+        }
+      }
+
+      setUrl(url) {
+        this.url = url;
+        if (this.audio) {
+          const wasPlaying = !this.audio.paused;
+          this.audio.pause();
+          this.audio.src = url;
+          this.audio.load();
+          if (wasPlaying) {
+            this.play();
+          }
+        }
+      }
+    }
+
+    // Unified manager to control active tracks, volume, and fallbacks
+    const SoundManager = {
+      currentType: 'lofi', // 'lofi', 'brown', 'mute'
+      volume: 0.5,
+
+      lofiStreamer: new AudioStreamer('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'),
+      brownGenerator: new BrownNoiseGenerator(),
+
+      init() {
+        // Setup lofi error handler -> automatically fallback to Brown Noise on network failure
+        this.lofiStreamer.onErrorCallback = (error) => {
+          console.warn("Lofi stream failed to load. Initiating Web Audio Brown noise fallback.");
+          
+          // Display a temporary alert in the UI sub-label
+          UI.subLabel.innerText = "Stream offline. Initializing Brown noise fallback.";
+          UI.subLabel.classList.remove('text-slate-500/50', 'text-slate-400/30');
+          UI.subLabel.classList.add('text-amber-400/80');
+
+          setTimeout(() => {
+            if (AppState.isFocusActive) {
+              UI.subLabel.innerText = "Settle into your space";
+              UI.subLabel.classList.remove('text-amber-400/80');
+              UI.subLabel.classList.add('text-slate-400/30');
+            } else {
+              const isStart = TimerManager.remainingSeconds === TimerManager.durationSeconds;
+              UI.subLabel.innerText = isStart ? "Click to enter flow" : "Click to resume focus";
+              UI.subLabel.classList.remove('text-amber-400/80');
+              UI.subLabel.classList.add('text-slate-500/50');
+            }
+          }, 4000);
+
+          // Force state shift to Brown noise if focus is active
+          if (AppState.isFocusActive) {
+            this.lofiStreamer.pause();
+            this.brownGenerator.play();
+          }
+          
+          this.currentType = 'brown';
+          this.updateControlsUI();
+        };
+
+        // Check if user has downloaded a local ambient.mp3 into the workspace root
+        fetch('./ambient.mp3', { method: 'HEAD' })
+          .then(res => {
+            if (res.ok) {
+              console.log("Local ambient.mp3 file found! Routing 'Lofi Beats' to your custom track.");
+              this.lofiStreamer.setUrl('./ambient.mp3');
+              this.updateControlsUI();
+            } else {
+              console.log("No local ambient.mp3 file found. Defaulting to stream.");
+            }
+          })
+          .catch(() => {
+            console.log("Checking for local ambient.mp3 failed. Defaulting to stream.");
+          });
+
+        this.lofiStreamer.init();
+        this.updateControlsUI();
+      },
+
+      play() {
+        if (this.currentType === 'lofi') {
+          this.lofiStreamer.play();
+        } else if (this.currentType === 'brown') {
+          this.brownGenerator.play();
+        }
+      },
+
+      pause() {
+        this.lofiStreamer.pause();
+        this.brownGenerator.stop();
+      },
+
+      setVolume(val) {
+        this.volume = val;
+        this.lofiStreamer.setVolume(val);
+        this.brownGenerator.setVolume(val);
+        this.updateVolumeIcon(val);
+      },
+
+      setSoundType(type) {
+        const wasPlaying = AppState.isFocusActive;
+        this.pause();
+        this.currentType = type;
+
+        if (wasPlaying) {
+          this.play();
+        }
+        
+        this.updateControlsUI();
+      },
+
+      updateVolumeIcon(val) {
+        const icon = document.getElementById('volume-icon');
+        if (!icon) return;
+
+        let iconName = 'volume-2';
+        if (val === 0) {
+          iconName = 'volume-x';
+        } else if (val < 0.3) {
+          iconName = 'volume';
+        } else if (val < 0.7) {
+          iconName = 'volume-1';
+        }
+
+        icon.setAttribute('data-lucide', iconName);
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      },
+
+      updateControlsUI() {
+        const displayLabel = document.getElementById('sound-display');
+        if (!displayLabel) return;
+
+        const isLocal = this.lofiStreamer.url === './ambient.mp3';
+
+        if (this.currentType === 'lofi') {
+          displayLabel.innerText = isLocal ? "Custom Lofi" : "Lofi Beats";
+          displayLabel.className = "text-indigo-400 font-medium transition-colors duration-300";
+        } else if (this.currentType === 'brown') {
+          displayLabel.innerText = "Brownian Focus";
+          displayLabel.className = "text-emerald-400 font-medium transition-colors duration-300";
+        } else {
+          displayLabel.innerText = "Muted";
+          displayLabel.className = "text-slate-600 transition-colors duration-300";
+        }
+
+        // Update active checked icons in the popover dropdown list
+        document.querySelectorAll('.sound-opt').forEach(opt => {
+          const checkIcon = opt.querySelector('.check-icon');
+          if (opt.dataset.sound === 'lofi') {
+            opt.querySelector('span').innerText = isLocal ? "Custom Lofi" : "Lofi Beats";
+          }
+          if (checkIcon) {
+            if (opt.dataset.sound === this.currentType) {
+              checkIcon.classList.remove('opacity-0');
+              checkIcon.classList.add('opacity-100');
+              opt.classList.add('bg-white/5', 'text-white');
+              opt.classList.remove('text-slate-400');
+            } else {
+              checkIcon.classList.add('opacity-0');
+              checkIcon.classList.remove('opacity-100');
+              opt.classList.remove('bg-white/5', 'text-white');
+              opt.classList.add('text-slate-400');
+            }
+          }
+        });
+      }
+    };
+
+    // ==========================================
+    // 2. Pomodoro Timer Manager
+    // ==========================================
+    const TimerManager = {
+      durationSeconds: 1500, // 25 minutes default
+      remainingSeconds: 1500,
+      intervalId: null,
+
+      init() {
+        this.remainingSeconds = this.durationSeconds;
+        this.updateUI();
+        this.updateTimerDisplayLabel();
+      },
+
+      start() {
+        this.stop(); // Clear any existing running timers
+        this.intervalId = setInterval(() => {
+          this.tick();
+        }, 1000);
+      },
+
+      pause() {
+        this.stop();
+      },
+
+      stop() {
+        if (this.intervalId) {
+          clearInterval(this.intervalId);
+          this.intervalId = null;
+        }
+      },
+
+      reset() {
+        this.stop();
+        this.remainingSeconds = this.durationSeconds;
+        this.updateUI();
+      },
+
+      setDuration(minutes) {
+        this.durationSeconds = minutes * 60;
+        this.reset();
+        this.updateTimerDisplayLabel();
+      },
+
+      tick() {
+        if (this.remainingSeconds > 0) {
+          this.remainingSeconds--;
+          this.updateUI();
+        } else {
+          this.complete();
+        }
+      },
+
+      complete() {
+        this.stop();
+        
+        // Play the synthesized crystalline chime
+        playCrystallineChime();
+
+        // Visual alert and reset state
+        UI.subLabel.innerText = "Focus complete. Well done.";
+        UI.subLabel.classList.remove('text-slate-500/50', 'text-slate-400/30');
+        UI.subLabel.classList.add('text-emerald-400', 'font-medium');
+        
+        // Reset App State back to paused/idle
+        if (AppState.isFocusActive) {
+          toggleFocusState(); 
+        }
+        
+        this.reset();
+
+        setTimeout(() => {
+          UI.subLabel.innerText = "Click to enter flow";
+          UI.subLabel.classList.remove('text-emerald-400', 'font-medium');
+          UI.subLabel.classList.add('text-slate-500/50');
+        }, 6000);
+      },
+
+      updateUI() {
+        const m = Math.floor(this.remainingSeconds / 60);
+        const s = this.remainingSeconds % 60;
+        const timeString = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+
+        // Large screen digits
+        UI.timerDisplayLarge.innerText = timeString;
+        // Small footer digits
+        UI.timerDisplayFooter.innerText = timeString;
+      },
+
+      updateTimerDisplayLabel() {
+        const mins = this.durationSeconds / 60;
+        
+        // Update check icons in the timer selection list
+        document.querySelectorAll('.timer-opt').forEach(opt => {
+          const checkIcon = opt.querySelector('.check-icon');
+          if (checkIcon) {
+            if (parseInt(opt.dataset.timer) === mins) {
+              checkIcon.classList.remove('opacity-0');
+              checkIcon.classList.add('opacity-100');
+              opt.classList.add('bg-white/5', 'text-white');
+              opt.classList.remove('text-slate-400');
+            } else {
+              checkIcon.classList.add('opacity-0');
+              checkIcon.classList.remove('opacity-100');
+              opt.classList.remove('bg-white/5', 'text-white');
+              opt.classList.add('text-slate-400');
+            }
+          }
+        });
+      }
+    };
+
+    // ==========================================
+    // 3. Application State Management
+    // ==========================================
+    const AppState = {
+      isFocusActive: false,
+      idleTimeoutId: null,
+      isDraggingVolume: false,
+      isHoveringVolume: false, // Prevents slider from vanishing on cursor leave
+      isTouchDevice: false,     // Detects touch viewports to adjust hover controls
+      soundManager: SoundManager,
+      timerManager: TimerManager
+    };
+
+    // ==========================================
+    // 4. DOM Elements Mapping
+    // ==========================================
+    const UI = {
+      body: document.body,
+      header: document.getElementById('app-header'),
+      footer: document.getElementById('app-footer'),
+      focusButton: document.getElementById('focus-button'),
+      playIconWrapper: document.getElementById('play-icon-wrapper'), // Resolved wrapper instead of replaced i element
+      activeIconWrapper: document.getElementById('active-icon-wrapper'),
+      statusContainer: document.getElementById('status-container'),
+      statusLabel: document.getElementById('status-label'),
+      subLabel: document.getElementById('sub-label'),
+      glowOrb1: document.getElementById('glow-orb-1'),
+      glowOrb2: document.getElementById('glow-orb-2'),
+      outerPulseRing: document.getElementById('outer-pulse-ring'),
+      ambientDot: document.getElementById('ambient-status-dot'),
+      btnSoundConfig: document.getElementById('btn-sound-config'),
+      soundPopover: document.getElementById('sound-popover'),
+      volumeContainer: document.getElementById('volume-container'),
+      volumeSlider: document.getElementById('volume-slider'),
+      // Timer-related element additions
+      timerContainer: document.getElementById('timer-container'),
+      timerDisplayLarge: document.getElementById('timer-display-large'),
+      timerDisplayFooter: document.getElementById('timer-display'),
+      btnTimerConfig: document.getElementById('btn-timer-config'),
+      timerPopover: document.getElementById('timer-popover'),
+      btnTimerReset: document.getElementById('btn-timer-reset')
+    };
+
+    // ==========================================
+    // 5. Render Updates
+    // ==========================================
+    function renderState() {
+      if (AppState.isFocusActive) {
+        // Transition to Focus Active
+        UI.focusButton.classList.add('active-state');
+        
+        // Icon crossfade
+        UI.playIconWrapper.classList.add('opacity-0', 'scale-75', '-rotate-45');
+        UI.playIconWrapper.classList.remove('opacity-100', 'scale-100', 'rotate-0');
+        
+        UI.activeIconWrapper.classList.add('opacity-100', 'scale-100', 'rotate-0');
+        UI.activeIconWrapper.classList.remove('opacity-0', 'scale-75', 'rotate-45');
+        
+        // Ambient Glow Orbs - activated with breathing motions
+        UI.glowOrb1.classList.replace('bg-indigo-500/0', 'bg-indigo-500/10');
+        UI.glowOrb2.classList.replace('bg-emerald-500/0', 'bg-emerald-500/15');
+        UI.glowOrb1.classList.add('animate-breath-1');
+        UI.glowOrb2.classList.add('animate-breath-2');
+
+        // Outer pulse ring
+        UI.outerPulseRing.classList.replace('border-indigo-500/0', 'border-emerald-500/20');
+        UI.outerPulseRing.classList.add('animate-ping', 'duration-1000');
+        
+        // Status indicators
+        UI.statusLabel.innerText = "Focus Active";
+        UI.statusLabel.classList.replace('text-slate-400/70', 'text-emerald-400');
+        UI.subLabel.innerText = "Settle into your space";
+        UI.subLabel.classList.replace('text-slate-500/50', 'text-slate-400/30');
+
+        UI.ambientDot.classList.replace('bg-slate-700', 'bg-emerald-500');
+
+        // Adjust timer layout opacity for active focus
+        UI.timerContainer.classList.replace('opacity-15', 'opacity-20');
+
+        // Close popovers if active
+        closeSoundPopover();
+        closeTimerPopover();
+
+        // Start idle hide manager
+        resetIdleTimer();
+      } else {
+        // Transition to Paused / Ready
+        UI.focusButton.classList.remove('active-state');
+        
+        // Icon crossfade
+        UI.playIconWrapper.classList.remove('opacity-0', 'scale-75', '-rotate-45');
+        UI.playIconWrapper.classList.add('opacity-100', 'scale-100', 'rotate-0');
+        
+        UI.activeIconWrapper.classList.remove('opacity-100', 'scale-100', 'rotate-0');
+        UI.activeIconWrapper.classList.add('opacity-0', 'scale-75', 'rotate-45');
+        
+        // Reset Ambient Glow Orbs
+        UI.glowOrb1.classList.replace('bg-indigo-500/10', 'bg-indigo-500/0');
+        UI.glowOrb2.classList.replace('bg-emerald-500/15', 'bg-emerald-500/0');
+        UI.glowOrb1.classList.remove('animate-breath-1');
+        UI.glowOrb2.classList.remove('animate-breath-2');
+
+        // Outer pulse ring
+        UI.outerPulseRing.classList.replace('border-emerald-500/20', 'border-indigo-500/0');
+        UI.outerPulseRing.classList.remove('animate-ping', 'duration-1000');
+        
+        // Status indicators
+        UI.statusLabel.innerText = "Paused";
+        UI.statusLabel.classList.replace('text-emerald-400', 'text-slate-400/70');
+        
+        const isStart = TimerManager.remainingSeconds === TimerManager.durationSeconds;
+        UI.subLabel.innerText = isStart ? "Click to enter flow" : "Click to resume focus";
+        UI.subLabel.classList.replace('text-slate-400/30', 'text-slate-500/50');
+
+        UI.ambientDot.classList.replace('bg-emerald-500', 'bg-slate-700');
+
+        // Adjust timer layout opacity for paused state
+        UI.timerContainer.classList.replace('opacity-20', 'opacity-15');
+        UI.timerContainer.classList.remove('opacity-[0.03]');
+
+        // Cancel idle timer and show interactive elements
+        clearIdleTimer();
+        showInteractiveUI();
+      }
+    }
+
+    // ==========================================
+    // 6. Idle UI Visiblity (Auto-hide logic)
+    // ==========================================
+    function resetIdleTimer() {
+      clearIdleTimer();
+      showInteractiveUI();
+      
+      if (AppState.isFocusActive) {
+        AppState.idleTimeoutId = setTimeout(() => {
+          fadeInteractiveUI();
+        }, 2500);
+      }
+    }
+
+    function clearIdleTimer() {
+      if (AppState.idleTimeoutId) {
+        clearTimeout(AppState.idleTimeoutId);
+        AppState.idleTimeoutId = null;
+      }
+    }
+
+    function fadeInteractiveUI() {
+      // Fade labels, headers, footers and popovers
+      UI.header.classList.add('opacity-0', 'pointer-events-none');
+      UI.header.classList.remove('opacity-25', 'hover:opacity-100');
+      
+      UI.footer.classList.add('opacity-0', 'pointer-events-none');
+      UI.footer.classList.remove('opacity-20', 'hover:opacity-100');
+      
+      UI.statusContainer.classList.add('opacity-0');
+      UI.focusButton.classList.add('opacity-20');
+      UI.focusButton.classList.remove('opacity-100');
+      
+      // Fade timer to extremely faint level to keep screen distraction-free
+      UI.timerContainer.classList.add('opacity-[0.03]');
+      UI.timerContainer.classList.remove('opacity-20');
+      
+      // Touch screen: hide volume slider when screen goes idle
+      if (AppState.isTouchDevice) {
+        UI.volumeContainer.classList.add('opacity-0', 'translate-y-2', 'pointer-events-none');
+        UI.volumeContainer.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+      }
+
+      closeSoundPopover();
+      closeTimerPopover();
+    }
+
+    function showInteractiveUI() {
+      UI.header.classList.remove('opacity-0', 'pointer-events-none');
+      UI.header.classList.add('opacity-25');
+      
+      UI.footer.classList.remove('opacity-0', 'pointer-events-none');
+      UI.footer.classList.add('opacity-20');
+      
+      UI.statusContainer.classList.remove('opacity-0');
+      UI.focusButton.classList.remove('opacity-20');
+      UI.focusButton.classList.add('opacity-100');
+      
+      // Restore active timer opacity
+      UI.timerContainer.classList.remove('opacity-[0.03]');
+      if (AppState.isFocusActive) {
+        UI.timerContainer.classList.add('opacity-20');
+      } else {
+        UI.timerContainer.classList.add('opacity-15');
+      }
+
+      // Touch screen: show volume slider when UI is active/awake
+      if (AppState.isTouchDevice) {
+        UI.volumeContainer.classList.remove('opacity-0', 'translate-y-2', 'pointer-events-none');
+        UI.volumeContainer.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+      }
+    }
+
+    // ==========================================
+    // 7. Popover Configuration Menus
+    // ==========================================
+    function toggleSoundPopover(e) {
+      if (e) e.stopPropagation();
+      const isOpen = UI.soundPopover.classList.contains('opacity-100');
+      if (isOpen) {
+        closeSoundPopover();
+      } else {
+        closeTimerPopover(); // Close other popover if open
+        UI.soundPopover.classList.replace('opacity-0', 'opacity-100');
+        UI.soundPopover.classList.replace('translate-y-2', 'translate-y-0');
+        UI.soundPopover.classList.replace('pointer-events-none', 'pointer-events-auto');
+      }
+    }
+
+    function closeSoundPopover() {
+      if (UI.soundPopover.classList.contains('opacity-100')) {
+        UI.soundPopover.classList.replace('opacity-100', 'opacity-0');
+        UI.soundPopover.classList.replace('translate-y-0', 'translate-y-2');
+        UI.soundPopover.classList.replace('pointer-events-auto', 'pointer-events-none');
+      }
+    }
+
+    function toggleTimerPopover(e) {
+      if (e) e.stopPropagation();
+      const isOpen = UI.timerPopover.classList.contains('opacity-100');
+      if (isOpen) {
+        closeTimerPopover();
+      } else {
+        closeSoundPopover(); // Close other popover if open
+        UI.timerPopover.classList.replace('opacity-0', 'opacity-100');
+        UI.timerPopover.classList.replace('translate-y-2', 'translate-y-0');
+        UI.timerPopover.classList.replace('pointer-events-none', 'pointer-events-auto');
+      }
+    }
+
+    function closeTimerPopover() {
+      if (UI.timerPopover.classList.contains('opacity-100')) {
+        UI.timerPopover.classList.replace('opacity-100', 'opacity-0');
+        UI.timerPopover.classList.replace('translate-y-0', 'translate-y-2');
+        UI.timerPopover.classList.replace('pointer-events-auto', 'pointer-events-none');
+      }
+    }
+
+    // ==========================================
+    // 8. Core Toggle Action
+    // ==========================================
+    function toggleFocusState() {
+      AppState.isFocusActive = !AppState.isFocusActive;
+
+      // Handle audio and countdown triggers in sync
+      if (AppState.isFocusActive) {
+        SoundManager.play();
+        TimerManager.start();
+      } else {
+        SoundManager.pause();
+        TimerManager.pause();
+      }
+      
+      renderState();
+    }
+
+    // ==========================================
+    // 9. Initialization & Listeners
+    // ==========================================
+    function init() {
+      // 1. Render Lucide icons
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+
+      // 2. Initialize Core components
+      SoundManager.init();
+      TimerManager.init();
+
+      // 3. Central button action listener
+      UI.focusButton.addEventListener('click', toggleFocusState);
+
+      // 4. Sound menu selection triggers
+      UI.btnSoundConfig.addEventListener('click', toggleSoundPopover);
+      document.querySelectorAll('.sound-opt').forEach(opt => {
+        opt.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const soundType = opt.dataset.sound;
+          SoundManager.setSoundType(soundType);
+          closeSoundPopover();
+        });
+      });
+
+      // 5. Timer menu selection triggers
+      UI.btnTimerConfig.addEventListener('click', toggleTimerPopover);
+      document.querySelectorAll('.timer-opt').forEach(opt => {
+        opt.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const minutes = parseInt(opt.dataset.timer);
+          TimerManager.setDuration(minutes);
+          closeTimerPopover();
+        });
+      });
+      UI.btnTimerReset.addEventListener('click', (e) => {
+        e.stopPropagation();
+        TimerManager.reset();
+        closeTimerPopover();
+      });
+
+      // Close popovers when clicking background
+      document.addEventListener('click', () => {
+        closeSoundPopover();
+        closeTimerPopover();
+      });
+
+      // 6. Volume Slider adjustments
+      UI.volumeSlider.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        SoundManager.setVolume(val);
+      });
+
+      UI.volumeSlider.addEventListener('mousedown', () => {
+        AppState.isDraggingVolume = true;
+      });
+      UI.volumeSlider.addEventListener('touchstart', () => {
+        AppState.isDraggingVolume = true;
+      });
+
+      const stopDraggingVolume = () => {
+        AppState.isDraggingVolume = false;
+      };
+      window.addEventListener('mouseup', stopDraggingVolume);
+      window.addEventListener('touchend', stopDraggingVolume);
+
+      // 6.5. volumeContainer hover state listeners
+      UI.volumeContainer.addEventListener('mouseenter', () => {
+        AppState.isHoveringVolume = true;
+      });
+      UI.volumeContainer.addEventListener('mouseleave', () => {
+        AppState.isHoveringVolume = false;
+      });
+
+      // 7. Mouse movement trigger -> Volume slider fade in near viewport bottom & UI waking
+      document.addEventListener('mousemove', (e) => {
+        // Wake up general elements if active
+        if (AppState.isFocusActive) {
+          resetIdleTimer();
+        }
+
+        // Only do cursor proximity checking on desktop/non-touchscreens
+        if (!AppState.isTouchDevice) {
+          // Check if cursor is within 140px of bottom of screen, or if hovering/dragging
+          const bottomThreshold = window.innerHeight - 140;
+          const isNearBottom = e.clientY >= bottomThreshold;
+          
+          if (isNearBottom || AppState.isHoveringVolume || AppState.isDraggingVolume) {
+            UI.volumeContainer.classList.remove('opacity-0', 'translate-y-2', 'pointer-events-none');
+            UI.volumeContainer.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+          } else {
+            UI.volumeContainer.classList.add('opacity-0', 'translate-y-2', 'pointer-events-none');
+            UI.volumeContainer.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+          }
+        }
+      });
+
+      // Also wake up UI on mobile touch
+      document.addEventListener('touchstart', () => {
+        if (AppState.isFocusActive) {
+          resetIdleTimer();
+        }
+      });
+
+      // 8. Detect coarse pointers (touchscreen devices)
+      AppState.isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+
+      // Initial State Setup
+      renderState();
+    }
+
+    // Launch Application
+    window.addEventListener('DOMContentLoaded', init);
+
+    // Export module hook references for external testing
+    window.FocusApp = {
+      AppState,
+      UI,
+      SoundManager,
+      TimerManager,
+      toggleFocusState,
+      renderState,
+      resetIdleTimer,
+      showInteractiveUI,
+      playCrystallineChime // Expose synthesized chime for testing
+    };
+  </script>
+</body>
+</html>
